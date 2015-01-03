@@ -10,6 +10,7 @@ var url = require('url');
 var http = require('http');
 var assert = require('assert');
 var debug = require('debug')('proxy');
+var once = require('once')
 var options = {};
 
 // log levels
@@ -46,16 +47,15 @@ function setup (server, options) {
 
   // the # of concurrent connections can be varied.
   var requestQueue = async.queue(function (task, done) {
-    onrequest.call(server, task.req, task.res, options);
-    return done();
-  }, options.concurrency || 9999);
+    connectTask(task, requestQueue, server, options, done);
+  }, options.concurrency || 1000);
 
   var connectQueue = async.queue(function (task, done) {
-    onconnect.call(server, task.req, task.socket, task.head, options);
-    return done();
-  }, options.concurrenty || 9999);
+    connectTask(task, connectQueue, server, options, done);
+  }, options.concurrency || 1000);
 
   server.on('request', function(req, res) {
+    req.pause();
     requestQueue.push({
       req: req,
       res: res
@@ -63,6 +63,8 @@ function setup (server, options) {
   });
 
   server.on('connect', function(req, socket, head) {
+    req.pause();
+    socket.pause();
     connectQueue.push({
       req: req,
       socket: socket,
@@ -71,6 +73,27 @@ function setup (server, options) {
   });
 
   return server;
+}
+
+function connectTask(task, queue, server, options, done) {
+  var socket = task.socket || task.req.socket;
+
+  task.req.resume();
+  if (task.socket) task.socket.resume();
+
+  console.log('proxy connection to: ' + chalk.green(task.req.url) + ' (connection backlog = ' + queue.length() + ')');
+
+  if (task.socket) {
+    onconnect.call(server, task.req, task.socket, task.head, options, once(function() {
+      console.log('end connection: ' + chalk.red(task.req.url) + ' (connection backlog = ' + queue.length() + ')');
+      return done();
+    }));
+  } else {
+    onrequest.call(server, task.req, task.res, options, once(function() {
+      console.log('end connection: ' + chalk.red(task.req.url) + ' (connection backlog = ' + queue.length() + ')');
+      return done();
+    }));
+  }
 }
 
 /**
@@ -137,7 +160,7 @@ function eachHeader (obj, fn) {
  * HTTP GET/POST/DELETE/PUT, etc. proxy requests.
  */
 
-function onrequest (req, res, options) {
+function onrequest (req, res, options, cb) {
 
   debug.request('%s %s HTTP/%s ', req.method, req.url, req.httpVersion);
   var server = this;
@@ -302,6 +325,7 @@ function onrequest (req, res, options) {
       debug.response('cleanup');
       socket.removeListener('close', onclose);
       res.removeListener('finish', onfinish);
+      return cb();
     }
 
     if (options.transformRequest) req = req.pipe(options.transformRequest());
@@ -313,7 +337,7 @@ function onrequest (req, res, options) {
  * HTTP CONNECT proxy requests.
  */
 
-function onconnect (req, socket, head, options) {
+function onconnect (req, socket, head, options, cb) {
   debug.request('%s %s HTTP/%s ', req.method, req.url, req.httpVersion);
   assert(!head || 0 == head.length, '"head" should be empty for proxy requests');
 
@@ -405,6 +429,7 @@ function onconnect (req, socket, head, options) {
       target.removeListener('error', ontargeterror);
       target.removeListener('end', ontargetend);
     }
+    return cb();
   }
 
   // create the `res` instance for this request since Node.js
