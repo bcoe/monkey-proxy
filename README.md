@@ -1,5 +1,8 @@
-proxy
+monkey-proxy
 =====
+
+fork of [tootallnate's](https://github.com/tootallnate) proxy, adding hooks for modifying requests.
+
 ### An HTTP proxy written with Node.js (think Squid)
 [![Build Status](https://travis-ci.org/TooTallNate/proxy.png?branch=master)](https://travis-ci.org/TooTallNate/proxy)
 

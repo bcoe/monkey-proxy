@@ -1,7 +1,7 @@
 {
-  "name": "proxy",
-  "version": "0.2.3",
-  "description": "An HTTP proxy written with Node.js (think Squid)",
+  "name": "monkey-proxy",
+  "version": "1.0.0",
+  "description": "fork of tootallnate's proxy, adding hooks for modifying requests",
   "main": "proxy.js",
   "scripts": {
     "test": "mocha --reporter spec"
@@ -23,7 +23,7 @@
   "author": "Nathan Rajlich <nathan@tootallnate.net> (http://n8.io/)",
   "repository": {
     "type": "git",
-    "url": "git://github.com/TooTallNate/proxy.git"
+    "url": "git://github.com/bcoe/,onkey-proxy.git"
   },
   "license": "MIT",
   "dependencies": {
