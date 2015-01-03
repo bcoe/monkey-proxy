@@ -23,7 +23,7 @@
   "author": "Nathan Rajlich <nathan@tootallnate.net> (http://n8.io/)",
   "repository": {
     "type": "git",
-    "url": "git://github.com/bcoe/,onkey-proxy.git"
+    "url": "git://github.com/bcoe/monkey-proxy.git"
   },
   "license": "MIT",
   "dependencies": {
