@@ -1,0 +1,39 @@
+{
+  "name": "proxy",
+  "version": "0.2.3",
+  "description": "An HTTP proxy written with Node.js (think Squid)",
+  "main": "proxy.js",
+  "scripts": {
+    "test": "mocha --reporter spec"
+  },
+  "bin": "./bin/proxy",
+  "keywords": [
+    "http",
+    "https",
+    "proxy",
+    "connect",
+    "tunnel",
+    "squid",
+    "privoxy",
+    "apache",
+    "mod_proxy",
+    "via",
+    "x-forwarded-for"
+  ],
+  "author": "Nathan Rajlich <nathan@tootallnate.net> (http://n8.io/)",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/TooTallNate/proxy.git"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "async": "^0.9.0",
+    "basic-auth-parser": "0.0.2",
+    "chalk": "^0.5.1",
+    "commander": "2.2.0",
+    "debug": "0.8.0"
+  },
+  "devDependencies": {
+    "mocha": "1.18.2"
+  }
+}
