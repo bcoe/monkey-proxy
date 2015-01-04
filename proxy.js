@@ -285,7 +285,12 @@ function onrequest (req, res, options, cb) {
       debug.response('HTTP/1.1 %s', proxyRes.statusCode);
       res.writeHead(proxyRes.statusCode, headers);
 
-      if (options.transformResponse) proxyRes = proxyRes.pipe(options.transformResponse());
+      if (Array.isArray(options.transformResponse)) {
+        options.transformResponse.forEach(function(transform) {
+          proxyRes = proxyRes.pipe(transform());
+        });
+      }
+      else if (options.transformResponse) proxyRes = proxyRes.pipe(options.transformResponse());
       proxyRes.pipe(res);
 
       res.on('finish', onfinish);
@@ -328,7 +333,12 @@ function onrequest (req, res, options, cb) {
       return cb();
     }
 
-    if (options.transformRequest) req = req.pipe(options.transformRequest());
+    if (Array.isArray(options.transformRequest)) {
+      options.transformRequest.forEach(function(transform) {
+        req = req.pipe(transform());
+      });
+    }
+    else if (options.transformRequest) req = req.pipe(options.transformRequest());
     req.pipe(proxyReq);
   });
 }
@@ -410,10 +420,20 @@ function onconnect (req, socket, head, options, cb) {
     res = null;
 
     ssocket = socket;
-    if (options.transformRequest) ssocket = socket.pipe(options.transformRequest());
+    if (Array.isArray(options.transformRequest)) {
+      options.transformRequest.forEach(function(transform) {
+        ssocket = ssocket.pipe(transform());
+      });
+    }
+    else if (options.transformRequest) ssocket = ssocket.pipe(options.transformRequest());
     ssocket.pipe(target);
 
-    if (options.transformResponse) target = target.pipe(options.transformResponse());
+    if (Array.isArray(options.transformResponse)) {
+      options.transformResponse.forEach(function(transform) {
+        target = target.pipe(transform());
+      });
+    }
+    else if (options.transformResponse) target = target.pipe(options.transformResponse());
     target.pipe(socket);
   }
 

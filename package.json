@@ -1,6 +1,6 @@
 {
   "name": "monkey-proxy",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "fork of tootallnate's proxy, adding hooks for modifying requests",
   "main": "proxy.js",
   "scripts": {
