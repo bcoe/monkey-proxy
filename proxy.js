@@ -86,12 +86,18 @@ function connectTask(task, queue, server, options, done) {
   if (task.socket) {
     onconnect.call(server, task.req, task.socket, task.head, options, once(function() {
       console.log('end connection: ' + chalk.red(task.req.url) + ' (connection backlog = ' + queue.length() + ')');
-      return done();
+      if (options.sleep) {
+        console.log(chalk.yellow('sleeping ' + options.sleep + ' (ms)'));
+        return setTimeout(done, options.sleep);
+      } else return done();
     }));
   } else {
     onrequest.call(server, task.req, task.res, options, once(function() {
       console.log('end connection: ' + chalk.red(task.req.url) + ' (connection backlog = ' + queue.length() + ')');
-      return done();
+      if (options.sleep) {
+        console.log(chalk.yellow('sleeping ' + options.sleep + ' (ms)'));
+        return setTimeout(done, options.sleep);
+      } else return done();
     }));
   }
 }
@@ -234,6 +240,11 @@ function onrequest (req, res, options, cb) {
     if (!hasVia) {
       headers.Via = via;
       debug.proxyRequest('adding new "Via" header: "%s"', headers.Via);
+    }
+
+    if (options.close) {
+      console.log(chalk.yellow("setting 'connection: close' header."));
+      headers.connection = 'close';
     }
 
     // custom `http.Agent` support, set `server.agent`
